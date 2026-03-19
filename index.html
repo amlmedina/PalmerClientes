@@ -307,15 +307,22 @@ let visCols=['Nombre_Persona','Nombre_Empresa','Estado_Funnel','Telefono','Corre
 
 const CDEFS={Nombre_Persona:'Nombre',Nombre_Empresa:'Empresa',Estado_Funnel:'Status',Telefono:'Teléfono',Puesto:'Puesto',Correo_Corp:'Correo',Tamano_Org:'Tamaño',Presupuesto:'Presupuesto'};
 
+
+
 // ── API ───────────────────────────────────────────────────────
 async function api(action,payload={}){
-  // ======= ESTA ES LA LÍNEA QUE SE MODIFICÓ =======
-  const res=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...payload})});
-  // ================================================
+  // Sin la propiedad 'headers', forzamos una petición simple 100% segura
+  const res=await fetch(API,{
+    method:'POST',
+    body:JSON.stringify({action,...payload})
+  });
+  
   if(!res.ok) throw new Error('HTTP '+res.status);
   return res.json();
 }
 
+
+  
 // ── DLP ───────────────────────────────────────────────────────
 function initDLP(u){
   document.body.classList.add('dlp');
