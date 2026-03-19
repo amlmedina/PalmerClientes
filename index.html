@@ -519,6 +519,7 @@ function badge(s){
 }
 
 // ── KANBAN CON DRAG & DROP Y BOTÓN DE ABRIR ───────────────────
+// ── KANBAN CON DRAG & DROP Y BOTÓN DE ABRIR ───────────────────
 function renderKanban(){
   if(!CFG.funnel)return;
   const stages=[...CFG.funnel.map(f=>f.stage),'Congelado'];
@@ -534,7 +535,7 @@ function renderKanban(){
            ondragend="this.style.opacity='1'">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:3px;">
           <div class="kname">${c.Nombre_Persona||'—'}</div>
-          <button class="kbtn-open" onclick="event.stopPropagation(); openDrawer(LEADS.find(x=>x.ID_Contacto==='${c.ID_Contacto}'), 'int')">📝 Ver</button>
+          <button class="kbtn-open" onclick="event.stopPropagation(); openDrawerById('${c.ID_Contacto}', 'int')">📝 Ver</button>
         </div>
         <div class="ksub">${c.Nombre_Empresa||'Sin empresa'}</div>
       </div>`).join('');
@@ -549,6 +550,18 @@ function renderKanban(){
         <div class="kcards" style="min-height: 100px;">${html||'<p style="color:var(--muted);font-size:.78rem;padding:4px 0;text-align:center;">Soltar lead aquí</p>'}</div>
       </div>`;
   }).join('');
+}
+
+
+  // FUNCION AUXILIAR PARA ABRIR DESDE EL KANBAN
+function openDrawerById(id, tab) {
+  // Limpiamos los IDs de espacios para asegurar que siempre lo encuentre
+  const lead = LEADS.find(c => String(c.ID_Contacto).trim() === String(id).trim());
+  if (lead) {
+    openDrawer(lead, tab);
+  } else {
+    sw({title: 'Error', text: 'No se encontró la información del lead.', icon: 'error'});
+  }
 }
 
 // FUNCIONES DRAG & DROP
