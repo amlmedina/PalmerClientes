@@ -143,7 +143,6 @@
 
 <div id="wm"></div>
 
-<!-- LOGIN -->
 <div id="pglogin">
   <div class="lbox">
     <h1>CRM<span>Pro</span></h1>
@@ -155,7 +154,6 @@
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <nav id="nav">
     <div class="logo">CRM<span>Pro</span></div>
@@ -167,7 +165,6 @@
     <div id="nuser"></div>
   </nav>
 
-  <!-- DIRECTORIO -->
   <div class="view on" id="vdir">
     <div id="dash">
       <div class="dc cg"><div class="lbl">Total</div><div class="val" id="dtotal">—</div></div>
@@ -188,14 +185,11 @@
     </div>
   </div>
 
-  <!-- FUNNEL -->
   <div class="view" id="vfunnel">
     <div id="kanban"></div>
   </div>
 
-  <!-- ADMIN -->
   <div class="view" id="vadmin">
-    <!-- Usuarios -->
     <div class="acard">
       <h3>Gestión de Usuarios</h3>
       <div class="fgrid">
@@ -213,7 +207,6 @@
       </div>
       <div id="utable" style="overflow-x:auto;margin-top:18px;"></div>
     </div>
-    <!-- Funnel -->
     <div class="acard">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
         <h3 style="margin:0;">Etapas del Funnel &amp; SLA</h3>
@@ -226,13 +219,11 @@
       </div>
       <div id="stages"></div>
     </div>
-    <!-- Catálogos -->
     <div class="acard">
       <h3>Catálogos de Selección</h3>
       <div class="fg"><label>Tomador de Decisión (coma)</label><input type="text" id="cfgtom"></div>
       <div class="fg"><label>Tamaño de Organización (coma)</label><input type="text" id="cfgtam"></div>
     </div>
-    <!-- Campos personalizados -->
     <div class="acard">
       <h3>Campos Personalizados del Formulario</h3>
       <p style="font-size:.78rem;color:var(--muted);margin-bottom:14px;">Los campos se agregan al formulario de perfil y a la hoja Directorio automáticamente.</p>
@@ -260,7 +251,6 @@
   </div>
 </div>
 
-<!-- DRAWER -->
 <div id="ov" onclick="closeDrawer()"></div>
 <div id="drawer">
   <div id="drhdr">
@@ -273,7 +263,6 @@
       <div class="dtab"     onclick="dTab('int')">Interacción</div>
       <div class="dtab"     onclick="dTab('hist')">Historial</div>
     </div>
-    <!-- Perfil -->
     <div class="dpanel on" id="dpperfil">
       <p class="stitle">Datos de Contacto</p>
       <div class="fgrid">
@@ -292,14 +281,12 @@
       <div id="drcustom"></div>
       <button class="btn btng btnw" onclick="doSavePerfil()">💾 Guardar Perfil</button>
     </div>
-    <!-- Interacción -->
     <div class="dpanel" id="dpint">
       <p class="stitle">Registrar Interacción</p>
       <div class="fg"><label>Estado del Funnel</label><select id="festado"></select></div>
       <div class="fg"><label>Notas de Interacción</label><textarea id="fnotas" placeholder="Describe el resultado de este contacto…"></textarea></div>
       <button class="btn btny btnw" onclick="doSaveInt()">⚡ Registrar Interacción</button>
     </div>
-    <!-- Historial -->
     <div class="dpanel" id="dphist">
       <p class="stitle">Timeline</p>
       <div class="tl" id="tl"></div>
@@ -322,7 +309,9 @@ const CDEFS={Nombre_Persona:'Nombre',Nombre_Empresa:'Empresa',Estado_Funnel:'Sta
 
 // ── API ───────────────────────────────────────────────────────
 async function api(action,payload={}){
-  const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...payload})});
+  // ======= ESTA ES LA LÍNEA QUE SE MODIFICÓ =======
+  const res=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...payload})});
+  // ================================================
   if(!res.ok) throw new Error('HTTP '+res.status);
   return res.json();
 }
