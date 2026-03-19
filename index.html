@@ -120,6 +120,23 @@
     .kcard:hover{border-color:var(--navy);transform:translateY(-2px);box-shadow:0 4px 6px rgba(0,0,0,.05)}.kcard.fz{border-left-color:var(--muted);opacity:.7}
     .kname{font-weight:700;font-size:.86rem;margin-bottom:3px;color:var(--text)}.ksub{font-size:.73rem;color:var(--muted);font-family:'IBM Plex Mono',monospace}
     
+    /* BOTON KANBAN PARA VER INTERACCIONES */
+    .kbtn-open {
+      background: var(--navy-light);
+      color: var(--navy);
+      border: none;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .kbtn-open:hover {
+      background: var(--navy);
+      color: #fff;
+    }
+
     /* DRAWER */
     #ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:400;backdrop-filter:blur(2px)}
     #drawer{position:fixed;top:0;right:-610px;width:580px;height:100vh;background:var(--s1);border-left:1px solid var(--brd);z-index:500;display:flex;flex-direction:column;transition:right .3s cubic-bezier(.4,0,.2,1);overflow:hidden;box-shadow:-10px 0 30px rgba(0,0,0,.05)}
@@ -501,7 +518,7 @@ function badge(s){
   return `<span class="badge ${m[s]||'bb'}">${s}</span>`;
 }
 
-// ── KANBAN CON DRAG & DROP ────────────────────────────────────
+// ── KANBAN CON DRAG & DROP Y BOTÓN DE ABRIR ───────────────────
 function renderKanban(){
   if(!CFG.funnel)return;
   const stages=[...CFG.funnel.map(f=>f.stage),'Congelado'];
@@ -514,9 +531,11 @@ function renderKanban(){
       <div class="kcard ${st==='Congelado'?'fz':''}" 
            draggable="true" 
            ondragstart="drag(event, '${c.ID_Contacto}')" 
-           ondragend="this.style.opacity='1'"
-           onclick="openDrawer(LEADS.find(x=>x.ID_Contacto==='${c.ID_Contacto}'), 'int')">
-        <div class="kname">${c.Nombre_Persona||'—'}</div>
+           ondragend="this.style.opacity='1'">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:3px;">
+          <div class="kname">${c.Nombre_Persona||'—'}</div>
+          <button class="kbtn-open" onclick="event.stopPropagation(); openDrawer(LEADS.find(x=>x.ID_Contacto==='${c.ID_Contacto}'), 'int')">📝 Ver</button>
+        </div>
         <div class="ksub">${c.Nombre_Empresa||'Sin empresa'}</div>
       </div>`).join('');
     
