@@ -7,7 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* NUEVO TEMA: Claro con acentos Azul Marino */
+    /* TEMA: Claro con acentos Azul Marino */
     :root {
       --bg: #f3f5f9;         /* Fondo general claro */
       --s1: #ffffff;         /* Superficie 1 (Tarjetas/Paneles) */
@@ -30,8 +30,8 @@
     .mono{font-family:'IBM Plex Mono',monospace}
     ::-webkit-scrollbar{width:6px;height:6px}
     ::-webkit-scrollbar-track{background:var(--bg)}
-    ::-webkit-scrollbar-thumb{background:var(--cbd5e1);border-radius:6px}
-    ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+    ::-webkit-scrollbar-thumb{background:var(--muted);border-radius:6px;opacity:0.5}
+    ::-webkit-scrollbar-thumb:hover{background:var(--navy)}
     
     /* DLP */
     .dlp{user-select:none;-webkit-user-select:none}
@@ -53,7 +53,7 @@
     /* BUTTONS */
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:7px;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:.83rem;cursor:pointer;transition:all .15s;white-space:nowrap}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .btng{background:var(--navy);color:#ffffff;box-shadow:0 4px 10px rgba(26,54,93,.15)} /* Ahora es Azul Marino */
+    .btng{background:var(--navy);color:#ffffff;box-shadow:0 4px 10px rgba(26,54,93,.15)}
     .btng:not(:disabled):hover{background:var(--navy-hover);transform:translateY(-1px)}
     .btny{background:var(--yel);color:#fff}
     .btny:not(:disabled):hover{opacity:.9}
@@ -109,12 +109,14 @@
     /* KANBAN */
     #vfunnel{padding:18px 20px;height:calc(100vh - 54px);background:var(--bg)}
     #kanban{display:flex;gap:13px;height:100%;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
-    .kcol{min-width:275px;width:275px;flex-shrink:0;background:var(--s1);border:1px solid var(--brd);border-radius:11px;display:flex;flex-direction:column;max-height:100%;box-shadow:0 2px 8px rgba(0,0,0,.02)}
+    .kcol{min-width:275px;width:275px;flex-shrink:0;background:var(--s1);border:1px solid var(--brd);border-radius:11px;display:flex;flex-direction:column;max-height:100%;box-shadow:0 2px 8px rgba(0,0,0,.02); transition: background 0.2s}
+    .kcol.dragover {background: var(--navy-light); border-color: var(--navy);}
     .khdr{padding:13px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--s2);border-radius:11px 11px 0 0}
     .ktitle{font-weight:700;font-size:.84rem;color:var(--navy)}.ksla{font-size:.62rem;color:var(--red);margin-top:2px}
     .kcnt{background:var(--s1);border:1px solid var(--brd);border-radius:20px;padding:2px 9px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--navy);font-weight:600}
     .kcards{overflow-y:auto;padding:10px;flex:1;background:var(--s2);border-radius:0 0 11px 11px}
-    .kcard{background:var(--s1);border:1px solid var(--brd);border-left:4px solid var(--navy);border-radius:7px;padding:12px;margin-bottom:9px;cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+    .kcard{background:var(--s1);border:1px solid var(--brd);border-left:4px solid var(--navy);border-radius:7px;padding:12px;margin-bottom:9px;cursor:grab;transition:transform .15s, box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+    .kcard:active{cursor:grabbing}
     .kcard:hover{border-color:var(--navy);transform:translateY(-2px);box-shadow:0 4px 6px rgba(0,0,0,.05)}.kcard.fz{border-left-color:var(--muted);opacity:.7}
     .kname{font-weight:700;font-size:.86rem;margin-bottom:3px;color:var(--text)}.ksub{font-size:.73rem;color:var(--muted);font-family:'IBM Plex Mono',monospace}
     
@@ -349,7 +351,7 @@ const CDEFS={Nombre_Persona:'Nombre',Nombre_Empresa:'Empresa',Estado_Funnel:'Sta
 const SW = { background: '#ffffff', color: '#0f172a', confirmButtonColor: '#1a365d' };
 const sw = o => Swal.fire({ ...SW, ...o });
 
-// ── API (CON CORS SOLUCIONADO) ────────────────────────────────
+// ── API (CON DETECCIÓN DE ERRORES SILENCIOSOS) ────────────────
 async function api(action,payload={}){
   const res = await fetch(API, {
     method: 'POST',
@@ -357,7 +359,13 @@ async function api(action,payload={}){
     body: JSON.stringify({ action, ...payload })
   });
   if(!res.ok) throw new Error('HTTP '+res.status);
-  return res.json();
+  
+  const data = await res.json();
+  if(data && data.error) {
+    console.error("Error desde GAS:", data.error);
+    throw new Error(data.error);
+  }
+  return data;
 }
 
 // ── DLP ───────────────────────────────────────────────────────
@@ -387,7 +395,7 @@ async function doLogin(){
     const r=await api('login',{correo:email,password:pass});
     if(r&&r.success){
       ME=r.user;
-      localStorage.setItem('crm_session', JSON.stringify(ME)); // Guardar Sesión
+      localStorage.setItem('crm_session', JSON.stringify(ME));
       initDLP(ME);
       document.getElementById('pglogin').style.display='none';
       document.getElementById('app').style.display='flex';
@@ -493,7 +501,7 @@ function badge(s){
   return `<span class="badge ${m[s]||'bb'}">${s}</span>`;
 }
 
-// ── KANBAN ────────────────────────────────────────────────────
+// ── KANBAN CON DRAG & DROP ────────────────────────────────────
 function renderKanban(){
   if(!CFG.funnel)return;
   const stages=[...CFG.funnel.map(f=>f.stage),'Congelado'];
@@ -501,9 +509,66 @@ function renderKanban(){
     const cfg=CFG.funnel.find(f=>f.stage===st);
     const cards=LEADS.filter(c=>c.Estado_Funnel===st);
     const sla=cfg?.limit>0?`<div class="ksla">⚡ Máx ${cfg.limit} strikes</div>`:'';
-    const html=cards.map(c=>`<div class="kcard ${st==='Congelado'?'fz':''}" onclick="openDrawer(LEADS.find(x=>x.ID_Contacto==='${c.ID_Contacto}'))"><div class="kname">${c.Nombre_Persona||'—'}</div><div class="ksub">${c.Nombre_Empresa||'Sin empresa'}</div></div>`).join('');
-    return `<div class="kcol"><div class="khdr"><div><div class="ktitle">${st}</div>${sla}</div><span class="kcnt">${cards.length}</span></div><div class="kcards">${html||'<p style="color:var(--muted);font-size:.78rem;padding:4px 0;">Sin leads aquí.</p>'}</div></div>`;
+    
+    const html=cards.map(c=>`
+      <div class="kcard ${st==='Congelado'?'fz':''}" 
+           draggable="true" 
+           ondragstart="drag(event, '${c.ID_Contacto}')" 
+           ondragend="this.style.opacity='1'"
+           onclick="openDrawer(LEADS.find(x=>x.ID_Contacto==='${c.ID_Contacto}'), 'int')">
+        <div class="kname">${c.Nombre_Persona||'—'}</div>
+        <div class="ksub">${c.Nombre_Empresa||'Sin empresa'}</div>
+      </div>`).join('');
+    
+    return `
+      <div class="kcol" 
+           ondragover="allowDrop(event)" 
+           ondragenter="this.classList.add('dragover')"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="this.classList.remove('dragover'); drop(event, '${st}')">
+        <div class="khdr"><div><div class="ktitle">${st}</div>${sla}</div><span class="kcnt">${cards.length}</span></div>
+        <div class="kcards" style="min-height: 100px;">${html||'<p style="color:var(--muted);font-size:.78rem;padding:4px 0;text-align:center;">Soltar lead aquí</p>'}</div>
+      </div>`;
   }).join('');
+}
+
+// FUNCIONES DRAG & DROP
+function drag(ev, id) {
+  ev.dataTransfer.setData("text/plain", id);
+  setTimeout(() => { ev.target.style.opacity = '0.4'; }, 10);
+}
+
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+async function drop(ev, nuevoEstado) {
+  ev.preventDefault();
+  const id = ev.dataTransfer.getData("text/plain");
+  if(!id) return;
+  
+  const lead = LEADS.find(c => c.ID_Contacto === id);
+  if(!lead || lead.Estado_Funnel === nuevoEstado) {
+    renderKanban(); 
+    return;
+  }
+
+  sw({title: 'Moviendo...', text: 'Actualizando base de datos', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+  
+  try {
+    const notas = `Lead movido automáticamente a "${nuevoEstado}" desde el Kanban.`;
+    await api('saveInteraction', {
+      idContacto: id, 
+      nuevoEstado: nuevoEstado, 
+      notas: notas, 
+      nombreUsuario: ME.nombre
+    });
+    await refresh(); 
+    Swal.fire({...SW, title:'✅ Movido', icon:'success', timer:1200, showConfirmButton:false});
+  } catch(e) {
+    Swal.fire({...SW, title:'Error', text:'No se pudo mover el lead', icon:'error'});
+    renderKanban(); 
+  }
 }
 
 // ── DRAWER ────────────────────────────────────────────────────
@@ -515,7 +580,7 @@ function openNew(){
   document.getElementById('tl').innerHTML='<p style="color:var(--muted);font-size:.82rem;">Guarda el perfil primero.</p>';
   dTab('perfil'); showDr();
 }
-function openDrawer(c){
+function openDrawer(c, tab='perfil'){
   if(typeof c==='string')c=JSON.parse(c.replace(/&apos;/g,"'"));
   CID=c.ID_Contacto;
   document.getElementById('drtitle').textContent=c.Nombre_Persona||'Sin nombre';
@@ -528,7 +593,7 @@ function openDrawer(c){
   setSel('fTomador_Decision',c.Tomador_Decision);
   setSel('fTamano_Org',c.Tamano_Org);
   setSel('festado',c.Estado_Funnel);
-  renderCFDr(c); loadTL(CID); dTab('perfil'); showDr();
+  renderCFDr(c); loadTL(CID); dTab(tab); showDr();
 }
 function showDr(){
   document.getElementById('ov').style.display='block';
@@ -636,7 +701,7 @@ async function doSaveInt(){
   const btn=event.target;btn.innerHTML='<span class="spin"></span> Registrando…';btn.disabled=true;
   try{
     await api('saveInteraction',{idContacto:CID,nuevoEstado:nuevo,notas,nombreUsuario:ME.nombre});
-    await refresh(); // Gracias al SpreadsheetApp.flush() en GAS, ahora sí baja fresco
+    await refresh(); 
     document.getElementById('fnotas').value='';
     setSel('festado',nuevo);
     await loadTL(CID);
